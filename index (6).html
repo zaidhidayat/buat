@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kalkulator Usia & Keuangan</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #f4f7f6; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            padding: 20px;
+            padding-bottom: 200px; 
+            min-height: 100vh;
+            margin: 0;
+        }
+        .section { 
+            background: white;
+            padding: 20px; 
+            margin-bottom: 20px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+            width: 100%; 
+            max-width: 400px; 
+        }
+        h2 { margin-top: 0; color: #333; font-size: 1.1rem; }
+        .subtitle { color: #666; font-size: 0.9rem; margin-bottom: 10px; font-weight: bold; }
+        input { 
+            padding: 12px; 
+            width: 100%; 
+            box-sizing: border-box; 
+            border: 2px solid #ddd; 
+            border-radius: 8px; 
+            margin-bottom: 10px;
+            font-size: 16px; 
+        }
+        button { 
+            padding: 12px; 
+            cursor: pointer; 
+            background-color: #007bff; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            width: 100%; 
+            font-weight: bold;
+        }
+        .result-box {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            font-size: 0.95rem;
+        }
+        .result-value { font-weight: bold; color: #2c3e50; }
+    </style>
+</head>
+<body>
+
+    <div class="section">
+        <h2>Penghitung Usia</h2>
+        <input type="date" id="birthDate">
+        <button id="btnUsia" onclick="handleUsia()">Hitung</button>
+        <p id="usiaResult" style="text-align: center; font-weight: bold; margin-top: 10px;"></p>
+    </div>
+
+    <div class="section" id="kalkulatorSection">
+        <h2>Kalkulator Mandiri</h2>
+        
+        <div class="subtitle">Gaji (per hari)</div>
+        <input type="number" id="gajiInput" placeholder="Masukkan gaji harian..." onfocus="scrollIntoView(this)">
+        <div class="result-box" style="margin-bottom: 20px;">
+            <div class="result-row"><span>Total Gaji (26 hari):</span> <span class="result-value" id="resGaji">Rp 0</span></div>
+        </div>
+
+        <div class="subtitle">Uang Makan (per minggu)</div>
+        <input type="number" id="makanInput" placeholder="Masukkan uang makan..." onfocus="scrollIntoView(this)">
+        <div class="result-box">
+            <div class="result-row"><span>Total:</span> <span class="result-value" id="resMakan">Rp 0</span></div>
+        </div>
+
+        <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+
+        <div class="subtitle">Biaya Tahunan (per bulan)</div>
+        <input type="number" id="listrikInput" placeholder="Listrik..." onfocus="scrollIntoView(this)">
+        <input type="number" id="wifiInput" placeholder="WiFi..." onfocus="scrollIntoView(this)">
+        <input type="number" id="lainInput" placeholder="Lain-lain..." onfocus="scrollIntoView(this)">
+        
+        <div class="result-box">
+            <div class="result-row"><span>Listrik (12 bln):</span> <span class="result-value" id="resListrik">Rp 0</span></div>
+            <div class="result-row"><span>WiFi (12 bln):</span> <span class="result-value" id="resWifi">Rp 0</span></div>
+            <div class="result-row"><span>Lain-lain (12 bln):</span> <span class="result-value" id="resLain">Rp 0</span></div>
+        </div>
+    </div>
+
+    <script>
+        function scrollIntoView(element) {
+            setTimeout(() => {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 300);
+        }
+
+        const format = (n) => "Rp " + n.toLocaleString('id-ID');
+
+        function handleUsia() {
+            const btn = document.getElementById('btnUsia');
+            if (btn.innerText === "Refresh") { location.reload(); return; }
+            const bDate = new Date(document.getElementById('birthDate').value);
+            const today = new Date();
+            if (!document.getElementById('birthDate').value) { alert("Pilih tanggal lahir"); return; }
+            let age = today.getFullYear() - bDate.getFullYear();
+            const m = today.getMonth() - bDate.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < bDate.getDate())) age--;
+            document.getElementById('usiaResult').innerText = "Usia Anda: " + age + " tahun";
+            btn.innerText = "Refresh";
+            btn.style.backgroundColor = "#6c757d";
+        }
+
+        // Logic Kalkulasi
+        document.getElementById('gajiInput').addEventListener('input', (e) => {
+            document.getElementById('resGaji').innerText = format(parseFloat(e.target.value || 0) * 26);
+        });
+        document.getElementById('makanInput').addEventListener('input', (e) => {
+            document.getElementById('resMakan').innerText = format(parseFloat(e.target.value || 0) * 7);
+        });
+        document.getElementById('listrikInput').addEventListener('input', (e) => {
+            document.getElementById('resListrik').innerText = format(parseFloat(e.target.value || 0) * 12);
+        });
+        document.getElementById('wifiInput').addEventListener('input', (e) => {
+            document.getElementById('resWifi').innerText = format(parseFloat(e.target.value || 0) * 12);
+        });
+        document.getElementById('lainInput').addEventListener('input', (e) => {
+            document.getElementById('resLain').innerText = format(parseFloat(e.target.value || 0) * 12);
+        });
+    </script>
+</body>
+</html>
