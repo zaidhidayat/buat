@@ -3,142 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kalkulator Usia & Keuangan</title>
+    <title>Kalkulator Ringkas</title>
     <style>
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background-color: #f4f7f6; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            padding: 20px;
-            padding-bottom: 200px; 
-            min-height: 100vh;
-            margin: 0;
-        }
-        .section { 
-            background: white;
-            padding: 20px; 
-            margin-bottom: 20px; 
-            border-radius: 12px; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
-            width: 100%; 
-            max-width: 400px; 
-        }
-        h2 { margin-top: 0; color: #333; font-size: 1.1rem; }
-        .subtitle { color: #666; font-size: 0.9rem; margin-bottom: 10px; font-weight: bold; }
-        input { 
-            padding: 12px; 
-            width: 100%; 
-            box-sizing: border-box; 
-            border: 2px solid #ddd; 
-            border-radius: 8px; 
-            margin-bottom: 10px;
-            font-size: 16px; 
-        }
-        button { 
-            padding: 12px; 
-            cursor: pointer; 
-            background-color: #007bff; 
-            color: white; 
-            border: none; 
-            border-radius: 8px; 
-            width: 100%; 
-            font-weight: bold;
-        }
-        .result-box {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
-        }
-        .result-row {
-            display: flex;
-            justify-content: space-between;
-            margin: 8px 0;
-            font-size: 0.95rem;
-        }
-        .result-value { font-weight: bold; color: #2c3e50; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; display: flex; flex-direction: column; align-items: center; padding: 20px; padding-bottom: 50px; min-height: 100vh; margin: 0; }
+        .section { background: white; padding: 20px; margin-bottom: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 450px; }
+        h2 { margin-top: 0; color: #333; font-size: 1.1rem; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; margin-bottom: 15px; }
+        
+        .row-wrapper { margin-bottom: 15px; }
+        .label-text { font-size: 0.85rem; font-weight: bold; color: #555; margin-bottom: 4px; display: block; }
+        .input-row { display: flex; align-items: center; gap: 10px; }
+        input { padding: 10px; flex: 1; border: 2px solid #ddd; border-radius: 6px; font-size: 14px; transition: background 0.3s; text-align: right; }
+        .filled { background-color: #e0e0e0; }
+        .res-text { flex: 0 0 120px; text-align: right; font-weight: bold; font-size: 0.9rem; color: #2c3e50; }
+        
+        button { padding: 10px; cursor: pointer; border: none; border-radius: 8px; font-weight: bold; background-color: #007bff; color: white; width: 100%; }
+        .total-box { border-top: 2px solid #eee; padding-top: 15px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .total-label { font-weight: bold; color: #004085; }
     </style>
 </head>
 <body>
 
     <div class="section">
         <h2>Penghitung Usia</h2>
-        <input type="date" id="birthDate">
+        <input type="text" id="birthDate" inputmode="numeric" placeholder="DD-MM-YYYY" maxlength="10" 
+               style="width: 100%; box-sizing: border-box; margin-bottom: 10px; text-align: center;">
         <button id="btnUsia" onclick="handleUsia()">Hitung</button>
         <p id="usiaResult" style="text-align: center; font-weight: bold; margin-top: 10px;"></p>
     </div>
 
-    <div class="section" id="kalkulatorSection">
-        <h2>Kalkulator Mandiri</h2>
-        
-        <div class="subtitle">Gaji (per hari)</div>
-        <input type="number" id="gajiInput" placeholder="Masukkan gaji harian..." onfocus="scrollIntoView(this)">
-        <div class="result-box" style="margin-bottom: 20px;">
-            <div class="result-row"><span>Total Gaji (26 hari):</span> <span class="result-value" id="resGaji">Rp 0</span></div>
+    <div class="section">
+        <h2>Pendapatan & Konsumsi</h2>
+        <div class="row-wrapper">
+            <span class="label-text">Gaji Harian x 26 Hari</span>
+            <div class="input-row">
+                <input type="text" inputmode="decimal" id="gajiInput" oninput="formatInput(this); updateAll()" onclick="resetField(this)" placeholder="0">
+                <div class="res-text" id="resGaji">Rp 0</div>
+            </div>
         </div>
-
-        <div class="subtitle">Uang Makan (per minggu)</div>
-        <input type="number" id="makanInput" placeholder="Masukkan uang makan..." onfocus="scrollIntoView(this)">
-        <div class="result-box">
-            <div class="result-row"><span>Total:</span> <span class="result-value" id="resMakan">Rp 0</span></div>
+        <div class="row-wrapper">
+            <span class="label-text">Uang Makan x 7 Hari</span>
+            <div class="input-row">
+                <input type="text" inputmode="decimal" id="makanInput" oninput="formatInput(this); updateAll()" onclick="resetField(this)" placeholder="0">
+                <div class="res-text" id="resMakan">Rp 0</div>
+            </div>
         </div>
+    </div>
 
-        <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
-
-        <div class="subtitle">Biaya Tahunan (per bulan)</div>
-        <input type="number" id="listrikInput" placeholder="Listrik..." onfocus="scrollIntoView(this)">
-        <input type="number" id="wifiInput" placeholder="WiFi..." onfocus="scrollIntoView(this)">
-        <input type="number" id="lainInput" placeholder="Lain-lain..." onfocus="scrollIntoView(this)">
-        
-        <div class="result-box">
-            <div class="result-row"><span>Listrik (12 bln):</span> <span class="result-value" id="resListrik">Rp 0</span></div>
-            <div class="result-row"><span>WiFi (12 bln):</span> <span class="result-value" id="resWifi">Rp 0</span></div>
-            <div class="result-row"><span>Lain-lain (12 bln):</span> <span class="result-value" id="resLain">Rp 0</span></div>
+    <div class="section">
+        <h2>Biaya Tahunan</h2>
+        <div class="row-wrapper">
+            <span class="label-text">Listrik x 12 Bulan</span>
+            <div class="input-row">
+                <input type="text" inputmode="decimal" id="listrikInput" oninput="formatInput(this); updateAll()" onclick="resetField(this)" placeholder="0">
+                <div class="res-text" id="resListrik">Rp 0</div>
+            </div>
+        </div>
+        <div class="row-wrapper">
+            <span class="label-text">WiFi x 12 Bulan</span>
+            <div class="input-row">
+                <input type="text" inputmode="decimal" id="wifiInput" oninput="formatInput(this); updateAll()" onclick="resetField(this)" placeholder="0">
+                <div class="res-text" id="resWifi">Rp 0</div>
+            </div>
+        </div>
+        <div class="row-wrapper">
+            <span class="label-text">Lain-lain x 12 Bulan</span>
+            <div class="input-row">
+                <input type="text" inputmode="decimal" id="lainInput" oninput="formatInput(this); updateAll()" onclick="resetField(this)" placeholder="0">
+                <div class="res-text" id="resLain">Rp 0</div>
+            </div>
+        </div>
+        <div class="total-box">
+            <span class="total-label">Total Tahunan:</span>
+            <span class="res-text" id="resTotal" style="color: #007bff; font-size: 1.1rem;">Rp 0</span>
         </div>
     </div>
 
     <script>
-        function scrollIntoView(element) {
-            setTimeout(() => {
-                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }, 300);
-        }
+        document.getElementById('birthDate').addEventListener('input', function (e) {
+            let v = e.target.value.replace(/\D/g, '');
+            if (v.length > 8) v = v.slice(0, 8);
+            if (v.length > 4) v = v.slice(0, 2) + '-' + v.slice(2, 4) + '-' + v.slice(4);
+            else if (v.length > 2) v = v.slice(0, 2) + '-' + v.slice(2);
+            e.target.value = v;
+        });
 
         const format = (n) => "Rp " + n.toLocaleString('id-ID');
+        
+        function formatInput(el) {
+            let val = el.value.replace(/\./g, '');
+            if (!isNaN(val) && val !== "") {
+                el.value = parseInt(val).toLocaleString('id-ID');
+                el.classList.add('filled');
+            } else if (val === "") {
+                el.value = "";
+                el.classList.remove('filled');
+            }
+        }
+
+        function updateAll() {
+            const getVal = (id) => parseFloat(document.getElementById(id).value.replace(/\./g, '') || 0);
+            document.getElementById('resGaji').innerText = format(getVal('gajiInput') * 26);
+            document.getElementById('resMakan').innerText = format(getVal('makanInput') * 7);
+            document.getElementById('resListrik').innerText = format(getVal('listrikInput') * 12);
+            document.getElementById('resWifi').innerText = format(getVal('wifiInput') * 12);
+            document.getElementById('resLain').innerText = format(getVal('lainInput') * 12);
+            document.getElementById('resTotal').innerText = format((getVal('listrikInput') + getVal('wifiInput') + getVal('lainInput')) * 12);
+        }
+
+        function resetField(el) {
+            el.value = "";
+            el.classList.remove('filled');
+            updateAll();
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
 
         function handleUsia() {
             const btn = document.getElementById('btnUsia');
-            if (btn.innerText === "Refresh") { location.reload(); return; }
-            const bDate = new Date(document.getElementById('birthDate').value);
+            
+            // Logika membersihkan isian jika tombol dalam status "Refresh"
+            if (btn.innerText === "Refresh") {
+                document.getElementById('birthDate').value = "";
+                document.getElementById('usiaResult').innerText = "";
+                btn.innerText = "Hitung";
+                btn.style.backgroundColor = "#007bff";
+                return;
+            }
+            
+            const input = document.getElementById('birthDate').value;
+            const parts = input.split('-');
+            if (parts.length !== 3 || parts[2].length < 4) { alert("Masukkan tanggal lengkap DD-MM-YYYY"); return; }
+            
+            const bDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
             const today = new Date();
-            if (!document.getElementById('birthDate').value) { alert("Pilih tanggal lahir"); return; }
+            
             let age = today.getFullYear() - bDate.getFullYear();
             const m = today.getMonth() - bDate.getMonth();
             if (m < 0 || (m === 0 && today.getDate() < bDate.getDate())) age--;
+            
             document.getElementById('usiaResult').innerText = "Usia Anda: " + age + " tahun";
             btn.innerText = "Refresh";
             btn.style.backgroundColor = "#6c757d";
         }
-
-        // Logic Kalkulasi
-        document.getElementById('gajiInput').addEventListener('input', (e) => {
-            document.getElementById('resGaji').innerText = format(parseFloat(e.target.value || 0) * 26);
-        });
-        document.getElementById('makanInput').addEventListener('input', (e) => {
-            document.getElementById('resMakan').innerText = format(parseFloat(e.target.value || 0) * 7);
-        });
-        document.getElementById('listrikInput').addEventListener('input', (e) => {
-            document.getElementById('resListrik').innerText = format(parseFloat(e.target.value || 0) * 12);
-        });
-        document.getElementById('wifiInput').addEventListener('input', (e) => {
-            document.getElementById('resWifi').innerText = format(parseFloat(e.target.value || 0) * 12);
-        });
-        document.getElementById('lainInput').addEventListener('input', (e) => {
-            document.getElementById('resLain').innerText = format(parseFloat(e.target.value || 0) * 12);
-        });
     </script>
 </body>
 </html>
