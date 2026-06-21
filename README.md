@@ -1,0 +1,2 @@
+# buat
+buat penghitungan
