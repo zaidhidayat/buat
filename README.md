@@ -1,3 +1,3 @@
 # buat
 buat penghitungan
-https://zaidhidayat.github.io/buat/
+https://mhidayat.my.id/
