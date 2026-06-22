@@ -10,30 +10,24 @@
         .active { display: block; }
         .section { background: white; padding: 20px; margin-bottom: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 450px; margin: 0 auto 20px auto; }
         h2 { margin-top: 0; color: #333; font-size: 1.1rem; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; margin-bottom: 15px; }
-        
         .row-wrapper { margin-bottom: 15px; }
         .label-text { font-size: 0.85rem; font-weight: bold; color: #555; margin-bottom: 4px; display: block; }
         .input-row { display: flex; align-items: center; gap: 10px; }
         input { padding: 10px; width: 100%; box-sizing: border-box; border: 2px solid #ddd; border-radius: 6px; font-size: 14px; text-align: right; }
         .filled { background-color: #e0e0e0; }
         .res-text { flex: 0 0 120px; text-align: right; font-weight: bold; font-size: 0.9rem; color: #2c3e50; }
-        
         button { padding: 10px; cursor: pointer; border: none; border-radius: 8px; font-weight: bold; background-color: #007bff; color: white; width: 100%; }
         .total-box { border-top: 2px solid #eee; padding-top: 15px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
         .total-label { font-weight: bold; color: #004085; }
-        
         .toggle-btn { color: #007bff; font-weight: bold; cursor: pointer; text-align: center; margin-top: 15px; font-size: 0.9rem; text-decoration: underline; }
         #usahaSection { display: none; margin-top: 15px; padding-top: 15px; border-top: 2px dashed #eee; }
-        
         .day-card { border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px; }
         .day-header { padding: 10px; background: #f8f9fa; cursor: pointer; font-weight: bold; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; }
         .day-content { padding: 10px; display: none; font-size: 0.85rem; }
         .btn-action { padding: 4px 8px; font-size: 0.7rem; cursor: pointer; border: none; border-radius: 4px; margin-left: 5px; }
-        
         .stats-container { margin-bottom: 15px; text-align: center; padding: 10px; background: #e7f1ff; border-radius: 8px; }
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.85rem; }
         .stat-box { border: 1px solid #eee; padding: 5px; border-radius: 4px; background: white; }
-        
         .navbar { position: fixed; bottom: 0; left: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; padding: 15px 0; justify-content: space-around; z-index: 1000; }
         .nav-item { cursor: pointer; font-weight: bold; color: #007bff; }
         #formProgress, #sectionTarget { display: none; margin-top: 10px; }
@@ -75,7 +69,7 @@
             <h2>Total Assignment</h2>
             <div style="cursor: pointer; color: #007bff; font-weight: bold; font-size: 0.9rem; margin-bottom: 10px;" onclick="toggleSection('sectionTarget')">Atur Target Assignment</div>
             <div id="sectionTarget">
-                <div class="row-wrapper"><input type="number" id="targetTot" inputmode="numeric" oninput="renderProgress()" placeholder="Masukkan Target..."></div>
+                <div class="row-wrapper"><input type="number" id="targetTot" inputmode="numeric" oninput="renderProgress(); saveAllData()" placeholder="Masukkan Target..."></div>
             </div>
             
             <div class="stats-container">
@@ -112,25 +106,31 @@
     </div>
 
     <script>
-        // Logika Umum
+        let progressData = JSON.parse(localStorage.getItem('myProgressData')) || [];
+        let savedTarget = localStorage.getItem('myTarget') || 0;
+        document.getElementById('targetTot').value = savedTarget;
+
+        function saveAllData() {
+            localStorage.setItem('myProgressData', JSON.stringify(progressData));
+            localStorage.setItem('myTarget', document.getElementById('targetTot').value);
+        }
+
         function showPage(p) { document.getElementById('page-kalkulator').style.display = (p === 'kalkulator') ? 'block' : 'none'; document.getElementById('page-progress').style.display = (p === 'progress') ? 'block' : 'none'; }
         function toggleSection(id) { const el = document.getElementById(id); el.style.display = (el.style.display === 'block' ? 'none' : 'block'); }
 
-        // Logika Kalkulator
         function toggleUsaha() { const sec = document.getElementById('usahaSection'); const btn = document.getElementById('toggleUsaha'); sec.style.display = (sec.style.display === "block" ? "none" : "block"); btn.innerText = (sec.style.display === "block" ? "Tutup" : "Ada Usaha"); }
         function updateLaba() { const m = parseFloat(document.getElementById('modalInput').value.replace(/\./g, '')||0); const j = parseFloat(document.getElementById('jualInput').value.replace(/\./g, '')||0); document.getElementById('resLaba').innerText = format(j-m); }
         const format = (n) => "Rp " + n.toLocaleString('id-ID');
         function formatInput(el) { let val = el.value.replace(/\./g, ''); if(!isNaN(val) && val!=="") { el.value = parseInt(val).toLocaleString('id-ID'); el.classList.add('filled'); } else { el.value=""; el.classList.remove('filled'); } }
         function updateAll() { const getVal = (id) => parseFloat(document.getElementById(id).value.replace(/\./g, '')||0); document.getElementById('resGaji').innerText = format(getVal('gajiInput') * 26); document.getElementById('resMakan').innerText = format(getVal('makanInput') * 7); document.getElementById('resListrik').innerText = format(getVal('listrikInput') * 12); document.getElementById('resWifi').innerText = format(getVal('wifiInput') * 12); document.getElementById('resLain').innerText = format(getVal('lainInput') * 12); document.getElementById('resTotal').innerText = format((getVal('listrikInput')+getVal('wifiInput')+getVal('lainInput'))*12); }
-        function resetField(el) { el.value=""; el.classList.remove('filled'); updateAll(); updateLaba(); el.scrollIntoView({behavior:'smooth', block:'center'}); }
+        function resetField(el) { el.value=""; el.classList.remove('filled'); updateAll(); updateLaba(); }
         function handleUsia() { const btn = document.getElementById('btnUsia'); if(btn.innerText==="Refresh") { document.getElementById('birthDate').value=""; document.getElementById('usiaResult').innerText=""; btn.innerText="Hitung"; btn.style.backgroundColor="#007bff"; return; } const parts = document.getElementById('birthDate').value.split('-'); if(parts.length!==3) return; const b = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`); const t = new Date(); let age = t.getFullYear()-b.getFullYear(); if(t.getMonth()<b.getMonth() || (t.getMonth()===b.getMonth() && t.getDate()<b.getDate())) age--; document.getElementById('usiaResult').innerText = "Usia Anda: "+age+" tahun"; btn.innerText="Refresh"; btn.style.backgroundColor="#6c757d"; }
 
-        // Logika Progress
-        let progressData = []; let editIdx = -1;
+        let editIdx = -1;
         function saveProgress() {
             const data = { d: document.getElementById('progDate').value, o: parseInt(document.getElementById('progOpen').value||0), s: parseInt(document.getElementById('progSubmit').value||0), r: parseInt(document.getElementById('progReject').value||0), a: parseInt(document.getElementById('progApprove').value||0) };
             if(editIdx === -1) progressData.push(data); else { progressData[editIdx] = data; editIdx = -1; document.getElementById('btnSave').innerText = "Simpan"; }
-            clearForm(); renderProgress(); toggleSection('formProgress');
+            clearForm(); renderProgress(); saveAllData(); toggleSection('formProgress');
         }
         function renderProgress() {
             const target = parseInt(document.getElementById('targetTot').value || 0);
@@ -138,19 +138,21 @@
             const list = document.getElementById('listProgress');
             list.innerHTML = '<h2>Riwayat Harian</h2>';
             let o=0, s=0, r=0, a=0;
-            progressData.forEach((p, i) => { o+=p.o; s+=p.s; r+=p.r; a+=p.a;
-                list.innerHTML += `<div class="day-card"><div class="day-header" onclick="toggleDay(${i})">${p.d} <div><button class="btn-action" onclick="event.stopPropagation(); editEntry(${i})">Edit</button><button class="btn-action" onclick="event.stopPropagation(); deleteEntry(${i})">Hapus</button></div></div><div class="day-content" id="d-${i}"><div style="font-weight:bold; margin-bottom:5px;">Target Harian: ${target}</div>Open: ${p.o} | Submit: ${p.s} | Reject: ${p.r} | Approve: ${p.a}</div></div>`;
+            
+            [...progressData].reverse().forEach((p, idx) => {
+                const actualIndex = progressData.length - 1 - idx;
+                o+=p.o; s+=p.s; r+=p.r; a+=p.a;
+                list.innerHTML += `<div class="day-card"><div class="day-header" onclick="toggleDay(${actualIndex})">${p.d} <div><button class="btn-action" onclick="event.stopPropagation(); editEntry(${actualIndex})">Edit</button><button class="btn-action" onclick="event.stopPropagation(); deleteEntry(${actualIndex})">Hapus</button></div></div><div class="day-content" id="d-${actualIndex}">Open: ${p.o} | Submit: ${p.s} | Reject: ${p.r} | Approve: ${p.a}</div></div>`;
             });
             document.getElementById('totOpen').innerText = o; document.getElementById('totSubmit').innerText = s; document.getElementById('totReject').innerText = r; document.getElementById('totApprove').innerText = a;
-            document.getElementById('diffOpen').innerText = target - o;
-            document.getElementById('diffSubmit').innerText = target - s;
-            document.getElementById('diffReject').innerText = target - r;
-            document.getElementById('diffApprove').innerText = target - a;
+            document.getElementById('diffOpen').innerText = target - o; document.getElementById('diffSubmit').innerText = target - s; document.getElementById('diffReject').innerText = target - r; document.getElementById('diffApprove').innerText = target - a;
         }
         function clearForm() { document.getElementById('progDate').value=""; document.getElementById('progOpen').value=""; document.getElementById('progSubmit').value=""; document.getElementById('progReject').value=""; document.getElementById('progApprove').value=""; }
-        function deleteEntry(i) { progressData.splice(i, 1); renderProgress(); }
+        function deleteEntry(i) { progressData.splice(i, 1); saveAllData(); renderProgress(); }
         function editEntry(i) { editIdx = i; const p=progressData[i]; document.getElementById('progDate').value=p.d; document.getElementById('progOpen').value=p.o; document.getElementById('progSubmit').value=p.s; document.getElementById('progReject').value=p.r; document.getElementById('progApprove').value=p.a; document.getElementById('btnSave').innerText="Update"; toggleSection('formProgress'); }
         function toggleDay(i) { const el = document.getElementById('d-'+i); el.style.display = (el.style.display === 'block' ? 'none' : 'block'); }
+        
+        renderProgress();
     </script>
 </body>
 </html>
