@@ -3,147 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kalkulator Ringkas</title>
+    <title>Kalkulator & Progress</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; display: flex; flex-direction: column; align-items: center; padding: 20px; padding-bottom: 50px; min-height: 100vh; margin: 0; }
-        .section { background: white; padding: 20px; margin-bottom: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 450px; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; padding: 20px; padding-bottom: 100px; margin: 0; }
+        .page { display: none; }
+        .active { display: block; }
+        .section { background: white; padding: 20px; margin-bottom: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 450px; margin: 0 auto 20px auto; }
         h2 { margin-top: 0; color: #333; font-size: 1.1rem; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; margin-bottom: 15px; }
         
         .row-wrapper { margin-bottom: 15px; }
         .label-text { font-size: 0.85rem; font-weight: bold; color: #555; margin-bottom: 4px; display: block; }
         .input-row { display: flex; align-items: center; gap: 10px; }
-        input { padding: 10px; flex: 1; border: 2px solid #ddd; border-radius: 6px; font-size: 14px; transition: background 0.3s; text-align: right; }
+        input { padding: 10px; width: 100%; box-sizing: border-box; border: 2px solid #ddd; border-radius: 6px; font-size: 14px; text-align: right; }
         .filled { background-color: #e0e0e0; }
         .res-text { flex: 0 0 120px; text-align: right; font-weight: bold; font-size: 0.9rem; color: #2c3e50; }
         
         button { padding: 10px; cursor: pointer; border: none; border-radius: 8px; font-weight: bold; background-color: #007bff; color: white; width: 100%; }
         .total-box { border-top: 2px solid #eee; padding-top: 15px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
         .total-label { font-weight: bold; color: #004085; }
+        
+        .toggle-btn { color: #007bff; font-weight: bold; cursor: pointer; text-align: center; margin-top: 15px; font-size: 0.9rem; text-decoration: underline; }
+        #usahaSection { display: none; margin-top: 15px; padding-top: 15px; border-top: 2px dashed #eee; }
+        
+        /* Progress Styles */
+        .day-card { border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px; }
+        .day-header { padding: 10px; background: #f8f9fa; cursor: pointer; font-weight: bold; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; }
+        .day-content { padding: 10px; display: none; font-size: 0.85rem; }
+        .btn-action { padding: 4px 8px; font-size: 0.7rem; cursor: pointer; border: none; border-radius: 4px; margin-left: 5px; }
+        
+        .navbar { position: fixed; bottom: 0; left: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; padding: 15px 0; justify-content: space-around; z-index: 1000; }
+        .nav-item { cursor: pointer; font-weight: bold; color: #007bff; }
+        #formProgress, #sectionTarget { display: none; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="section">
-        <h2>Penghitung Usia</h2>
-        <input type="text" id="birthDate" inputmode="numeric" placeholder="DD-MM-YYYY" maxlength="10" 
-               style="width: 100%; box-sizing: border-box; margin-bottom: 10px; text-align: center;">
-        <button id="btnUsia" onclick="handleUsia()">Hitung</button>
-        <p id="usiaResult" style="text-align: center; font-weight: bold; margin-top: 10px;"></p>
+    <div id="page-kalkulator" class="page active">
+        <div class="section">
+            <h2>Penghitung Usia</h2>
+            <input type="text" id="birthDate" inputmode="numeric" placeholder="DD-MM-YYYY" maxlength="10" style="width: 100%; box-sizing: border-box; margin-bottom: 10px; text-align: center;">
+            <button id="btnUsia" onclick="handleUsia()">Hitung</button>
+            <p id="usiaResult" style="text-align: center; font-weight: bold; margin-top: 10px;"></p>
+        </div>
+
+        <div class="section">
+            <h2>Pendapatan & Konsumsi</h2>
+            <div class="row-wrapper"><span class="label-text">Gaji Harian x 26 Hari</span><div class="input-row"><input type="text" inputmode="decimal" id="gajiInput" oninput="formatInput(this); updateAll()" onclick="resetField(this)" placeholder="0"><div class="res-text" id="resGaji">Rp 0</div></div></div>
+            <div class="row-wrapper"><span class="label-text">Uang Makan x 7 Hari</span><div class="input-row"><input type="text" inputmode="decimal" id="makanInput" oninput="formatInput(this); updateAll()" onclick="resetField(this)" placeholder="0"><div class="res-text" id="resMakan">Rp 0</div></div></div>
+        </div>
+
+        <div class="section">
+            <h2>Biaya Tahunan</h2>
+            <div class="row-wrapper"><span class="label-text">Listrik x 12 Bulan</span><div class="input-row"><input type="text" inputmode="decimal" id="listrikInput" oninput="formatInput(this); updateAll()" onclick="resetField(this)" placeholder="0"><div class="res-text" id="resListrik">Rp 0</div></div></div>
+            <div class="row-wrapper"><span class="label-text">WiFi x 12 Bulan</span><div class="input-row"><input type="text" inputmode="decimal" id="wifiInput" oninput="formatInput(this); updateAll()" onclick="resetField(this)" placeholder="0"><div class="res-text" id="resWifi">Rp 0</div></div></div>
+            <div class="row-wrapper"><span class="label-text">Lain-lain x 12 Bulan</span><div class="input-row"><input type="text" inputmode="decimal" id="lainInput" oninput="formatInput(this); updateAll()" onclick="resetField(this)" placeholder="0"><div class="res-text" id="resLain">Rp 0</div></div></div>
+            <div class="total-box"><span class="total-label">Total Tahunan:</span><span class="res-text" id="resTotal" style="color: #007bff; font-size: 1.1rem;">Rp 0</span></div>
+            <div class="toggle-btn" id="toggleUsaha" onclick="toggleUsaha()">Ada Usaha</div>
+            <div id="usahaSection">
+                <div class="row-wrapper"><span class="label-text">Modal</span><div class="input-row"><input type="text" inputmode="decimal" id="modalInput" oninput="formatInput(this); updateLaba()" onclick="resetField(this)" placeholder="0"></div></div>
+                <div class="row-wrapper"><span class="label-text">Penjualan</span><div class="input-row"><input type="text" inputmode="decimal" id="jualInput" oninput="formatInput(this); updateLaba()" onclick="resetField(this)" placeholder="0"></div></div>
+                <div class="total-box"><span class="total-label">Laba Bersih:</span><span class="res-text" id="resLaba" style="color: #28a745; font-size: 1.1rem;">Rp 0</span></div>
+            </div>
+        </div>
     </div>
 
-    <div class="section">
-        <h2>Pendapatan & Konsumsi</h2>
-        <div class="row-wrapper">
-            <span class="label-text">Gaji Harian x 26 Hari</span>
-            <div class="input-row">
-                <input type="text" inputmode="decimal" id="gajiInput" oninput="formatInput(this); updateAll()" onclick="resetField(this)" placeholder="0">
-                <div class="res-text" id="resGaji">Rp 0</div>
+    <div id="page-progress" class="page">
+        <div class="section">
+            <h2>Total Assignment</h2>
+            <div style="cursor: pointer; color: #007bff; font-size: 0.9rem; font-weight: bold; margin-bottom: 5px;" onclick="toggleSection('sectionTarget')">Atur Target Assignment</div>
+            <div id="sectionTarget">
+                <div class="row-wrapper"><span class="label-text">Target Assignment</span><input type="number" id="targetTot" inputmode="numeric" oninput="renderProgress()" placeholder=""></div>
+            </div>
+            <div style="font-size: 0.9rem; color: #555; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                <div>Target: <b id="dispTarget">0</b></div><div>Open: <b id="totOpen">0</b></div>
+                <div>Submit: <b id="totSubmit">0</b></div><div>Reject: <b id="totReject">0</b></div>
+                <div>Approve: <b id="totApprove">0</b></div>
             </div>
         </div>
-        <div class="row-wrapper">
-            <span class="label-text">Uang Makan x 7 Hari</span>
-            <div class="input-row">
-                <input type="text" inputmode="decimal" id="makanInput" oninput="formatInput(this); updateAll()" onclick="resetField(this)" placeholder="0">
-                <div class="res-text" id="resMakan">Rp 0</div>
+
+        <div class="section">
+            <h2 style="cursor: pointer; color: #007bff;" onclick="toggleSection('formProgress')">+ Tambah Progress Harian</h2>
+            <div id="formProgress">
+                <div class="row-wrapper"><span class="label-text">Tanggal</span><input type="text" id="progDate" placeholder="DD-MM-YYYY"></div>
+                <div class="row-wrapper"><span class="label-text">Open</span><input type="number" id="progOpen" inputmode="numeric"></div>
+                <div class="row-wrapper"><span class="label-text">Submit</span><input type="number" id="progSubmit" inputmode="numeric"></div>
+                <div class="row-wrapper"><span class="label-text">Reject</span><input type="number" id="progReject" inputmode="numeric"></div>
+                <div class="row-wrapper"><span class="label-text">Approve</span><input type="number" id="progApprove" inputmode="numeric"></div>
+                <button id="btnSave" onclick="saveProgress()" style="width: 100%; padding: 10px; background: #007bff; color: white; border: none; border-radius: 8px;">Simpan</button>
             </div>
         </div>
+
+        <div class="section" id="listProgress"><h2>Riwayat Harian</h2></div>
     </div>
 
-    <div class="section">
-        <h2>Biaya Tahunan</h2>
-        <div class="row-wrapper">
-            <span class="label-text">Listrik x 12 Bulan</span>
-            <div class="input-row">
-                <input type="text" inputmode="decimal" id="listrikInput" oninput="formatInput(this); updateAll()" onclick="resetField(this)" placeholder="0">
-                <div class="res-text" id="resListrik">Rp 0</div>
-            </div>
-        </div>
-        <div class="row-wrapper">
-            <span class="label-text">WiFi x 12 Bulan</span>
-            <div class="input-row">
-                <input type="text" inputmode="decimal" id="wifiInput" oninput="formatInput(this); updateAll()" onclick="resetField(this)" placeholder="0">
-                <div class="res-text" id="resWifi">Rp 0</div>
-            </div>
-        </div>
-        <div class="row-wrapper">
-            <span class="label-text">Lain-lain x 12 Bulan</span>
-            <div class="input-row">
-                <input type="text" inputmode="decimal" id="lainInput" oninput="formatInput(this); updateAll()" onclick="resetField(this)" placeholder="0">
-                <div class="res-text" id="resLain">Rp 0</div>
-            </div>
-        </div>
-        <div class="total-box">
-            <span class="total-label">Total Tahunan:</span>
-            <span class="res-text" id="resTotal" style="color: #007bff; font-size: 1.1rem;">Rp 0</span>
-        </div>
+    <div class="navbar">
+        <div class="nav-item" onclick="showPage('kalkulator')">Kalkulator</div>
+        <div class="nav-item" onclick="showPage('progress')">Progress</div>
     </div>
 
     <script>
-        document.getElementById('birthDate').addEventListener('input', function (e) {
-            let v = e.target.value.replace(/\D/g, '');
-            if (v.length > 8) v = v.slice(0, 8);
-            if (v.length > 4) v = v.slice(0, 2) + '-' + v.slice(2, 4) + '-' + v.slice(4);
-            else if (v.length > 2) v = v.slice(0, 2) + '-' + v.slice(2);
-            e.target.value = v;
-        });
+        // Logika Umum
+        function showPage(p) {
+            document.getElementById('page-kalkulator').style.display = (p === 'kalkulator') ? 'block' : 'none';
+            document.getElementById('page-progress').style.display = (p === 'progress') ? 'block' : 'none';
+        }
+        function toggleSection(id) { const el = document.getElementById(id); el.style.display = (el.style.display === 'block' ? 'none' : 'block'); }
 
+        // Logika Kalkulator
+        function toggleUsaha() { const sec = document.getElementById('usahaSection'); const btn = document.getElementById('toggleUsaha'); sec.style.display = (sec.style.display === "block" ? "none" : "block"); btn.innerText = (sec.style.display === "block" ? "Tutup" : "Ada Usaha"); }
+        function updateLaba() { const m = parseFloat(document.getElementById('modalInput').value.replace(/\./g, '')||0); const j = parseFloat(document.getElementById('jualInput').value.replace(/\./g, '')||0); document.getElementById('resLaba').innerText = format(j-m); }
         const format = (n) => "Rp " + n.toLocaleString('id-ID');
-        
-        function formatInput(el) {
-            let val = el.value.replace(/\./g, '');
-            if (!isNaN(val) && val !== "") {
-                el.value = parseInt(val).toLocaleString('id-ID');
-                el.classList.add('filled');
-            } else if (val === "") {
-                el.value = "";
-                el.classList.remove('filled');
-            }
-        }
+        function formatInput(el) { let val = el.value.replace(/\./g, ''); if(!isNaN(val) && val!=="") { el.value = parseInt(val).toLocaleString('id-ID'); el.classList.add('filled'); } else { el.value=""; el.classList.remove('filled'); } }
+        function updateAll() { const getVal = (id) => parseFloat(document.getElementById(id).value.replace(/\./g, '')||0); document.getElementById('resGaji').innerText = format(getVal('gajiInput') * 26); document.getElementById('resMakan').innerText = format(getVal('makanInput') * 7); document.getElementById('resListrik').innerText = format(getVal('listrikInput') * 12); document.getElementById('resWifi').innerText = format(getVal('wifiInput') * 12); document.getElementById('resLain').innerText = format(getVal('lainInput') * 12); document.getElementById('resTotal').innerText = format((getVal('listrikInput')+getVal('wifiInput')+getVal('lainInput'))*12); }
+        function resetField(el) { el.value=""; el.classList.remove('filled'); updateAll(); updateLaba(); el.scrollIntoView({behavior:'smooth', block:'center'}); }
+        function handleUsia() { const btn = document.getElementById('btnUsia'); if(btn.innerText==="Refresh") { document.getElementById('birthDate').value=""; document.getElementById('usiaResult').innerText=""; btn.innerText="Hitung"; btn.style.backgroundColor="#007bff"; return; } const parts = document.getElementById('birthDate').value.split('-'); if(parts.length!==3) return; const b = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`); const t = new Date(); let age = t.getFullYear()-b.getFullYear(); if(t.getMonth()<b.getMonth() || (t.getMonth()===b.getMonth() && t.getDate()<b.getDate())) age--; document.getElementById('usiaResult').innerText = "Usia Anda: "+age+" tahun"; btn.innerText="Refresh"; btn.style.backgroundColor="#6c757d"; }
 
-        function updateAll() {
-            const getVal = (id) => parseFloat(document.getElementById(id).value.replace(/\./g, '') || 0);
-            document.getElementById('resGaji').innerText = format(getVal('gajiInput') * 26);
-            document.getElementById('resMakan').innerText = format(getVal('makanInput') * 7);
-            document.getElementById('resListrik').innerText = format(getVal('listrikInput') * 12);
-            document.getElementById('resWifi').innerText = format(getVal('wifiInput') * 12);
-            document.getElementById('resLain').innerText = format(getVal('lainInput') * 12);
-            document.getElementById('resTotal').innerText = format((getVal('listrikInput') + getVal('wifiInput') + getVal('lainInput')) * 12);
+        // Logika Progress
+        let progressData = []; let editIdx = -1;
+        function saveProgress() {
+            const data = { d: document.getElementById('progDate').value, o: parseInt(document.getElementById('progOpen').value||0), s: parseInt(document.getElementById('progSubmit').value||0), r: parseInt(document.getElementById('progReject').value||0), a: parseInt(document.getElementById('progApprove').value||0) };
+            if(editIdx === -1) progressData.push(data); else { progressData[editIdx] = data; editIdx = -1; document.getElementById('btnSave').innerText = "Simpan"; }
+            clearForm(); renderProgress(); toggleSection('formProgress');
         }
-
-        function resetField(el) {
-            el.value = "";
-            el.classList.remove('filled');
-            updateAll();
-            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        function renderProgress() {
+            const list = document.getElementById('listProgress'); const target = document.getElementById('targetTot').value || 0;
+            document.getElementById('dispTarget').innerText = target; list.innerHTML = '<h2>Riwayat Harian</h2>';
+            let o=0, s=0, r=0, a=0;
+            progressData.forEach((p, i) => { o+=p.o; s+=p.s; r+=p.r; a+=p.a;
+                list.innerHTML += `<div class="day-card"><div class="day-header" onclick="toggleDay(${i})">${p.d} <div><button class="btn-action" onclick="event.stopPropagation(); editEntry(${i})">Edit</button><button class="btn-action" onclick="event.stopPropagation(); deleteEntry(${i})">Hapus</button></div></div><div class="day-content" id="d-${i}">Open: ${p.o} | Submit: ${p.s} | Reject: ${p.r} | Approve: ${p.a}</div></div>`;
+            });
+            document.getElementById('totOpen').innerText = o; document.getElementById('totSubmit').innerText = s; document.getElementById('totReject').innerText = r; document.getElementById('totApprove').innerText = a;
         }
-
-        function handleUsia() {
-            const btn = document.getElementById('btnUsia');
-            
-            // Logika membersihkan isian jika tombol dalam status "Refresh"
-            if (btn.innerText === "Refresh") {
-                document.getElementById('birthDate').value = "";
-                document.getElementById('usiaResult').innerText = "";
-                btn.innerText = "Hitung";
-                btn.style.backgroundColor = "#007bff";
-                return;
-            }
-            
-            const input = document.getElementById('birthDate').value;
-            const parts = input.split('-');
-            if (parts.length !== 3 || parts[2].length < 4) { alert("Masukkan tanggal lengkap DD-MM-YYYY"); return; }
-            
-            const bDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
-            const today = new Date();
-            
-            let age = today.getFullYear() - bDate.getFullYear();
-            const m = today.getMonth() - bDate.getMonth();
-            if (m < 0 || (m === 0 && today.getDate() < bDate.getDate())) age--;
-            
-            document.getElementById('usiaResult').innerText = "Usia Anda: " + age + " tahun";
-            btn.innerText = "Refresh";
-            btn.style.backgroundColor = "#6c757d";
-        }
+        function clearForm() { document.getElementById('progDate').value=""; document.getElementById('progOpen').value=""; document.getElementById('progSubmit').value=""; document.getElementById('progReject').value=""; document.getElementById('progApprove').value=""; }
+        function deleteEntry(i) { progressData.splice(i, 1); renderProgress(); }
+        function editEntry(i) { editIdx = i; const p=progressData[i]; document.getElementById('progDate').value=p.d; document.getElementById('progOpen').value=p.o; document.getElementById('progSubmit').value=p.s; document.getElementById('progReject').value=p.r; document.getElementById('progApprove').value=p.a; document.getElementById('btnSave').innerText="Update"; toggleSection('formProgress'); }
+        function toggleDay(i) { const el = document.getElementById('d-'+i); el.style.display = (el.style.display === 'block' ? 'none' : 'block'); }
     </script>
 </body>
 </html>
