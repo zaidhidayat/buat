@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kalkulator & Progress</title>
+    <title>Kalkulator & Progress Kerja</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; padding: 20px; padding-bottom: 100px; margin: 0; }
         .page { display: none; }
@@ -25,11 +25,14 @@
         .toggle-btn { color: #007bff; font-weight: bold; cursor: pointer; text-align: center; margin-top: 15px; font-size: 0.9rem; text-decoration: underline; }
         #usahaSection { display: none; margin-top: 15px; padding-top: 15px; border-top: 2px dashed #eee; }
         
-        /* Progress Styles */
         .day-card { border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px; }
         .day-header { padding: 10px; background: #f8f9fa; cursor: pointer; font-weight: bold; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; }
         .day-content { padding: 10px; display: none; font-size: 0.85rem; }
         .btn-action { padding: 4px 8px; font-size: 0.7rem; cursor: pointer; border: none; border-radius: 4px; margin-left: 5px; }
+        
+        .stats-container { margin-bottom: 15px; text-align: center; padding: 10px; background: #e7f1ff; border-radius: 8px; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.85rem; }
+        .stat-box { border: 1px solid #eee; padding: 5px; border-radius: 4px; background: white; }
         
         .navbar { position: fixed; bottom: 0; left: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; padding: 15px 0; justify-content: space-around; z-index: 1000; }
         .nav-item { cursor: pointer; font-weight: bold; color: #007bff; }
@@ -70,21 +73,28 @@
     <div id="page-progress" class="page">
         <div class="section">
             <h2>Total Assignment</h2>
-            <div style="cursor: pointer; color: #007bff; font-size: 0.9rem; font-weight: bold; margin-bottom: 5px;" onclick="toggleSection('sectionTarget')">Atur Target Assignment</div>
+            <div style="cursor: pointer; color: #007bff; font-weight: bold; font-size: 0.9rem; margin-bottom: 10px;" onclick="toggleSection('sectionTarget')">Atur Target Assignment</div>
             <div id="sectionTarget">
-                <div class="row-wrapper"><span class="label-text">Target Assignment</span><input type="number" id="targetTot" inputmode="numeric" oninput="renderProgress()" placeholder=""></div>
+                <div class="row-wrapper"><input type="number" id="targetTot" inputmode="numeric" oninput="renderProgress()" placeholder="Masukkan Target..."></div>
             </div>
-            <div style="font-size: 0.9rem; color: #555; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
-                <div>Target: <b id="dispTarget">0</b></div><div>Open: <b id="totOpen">0</b></div>
-                <div>Submit: <b id="totSubmit">0</b></div><div>Reject: <b id="totReject">0</b></div>
-                <div>Approve: <b id="totApprove">0</b></div>
+            
+            <div class="stats-container">
+                <div style="font-size: 0.8rem; color: #555;">TOTAL TARGET</div>
+                <div style="font-size: 1.5rem; font-weight: bold; color: #007bff;" id="dispTarget">0</div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-box">Open: <b id="totOpen">0</b><br><small>Selisih: <b id="diffOpen" style="color:red">0</b></small></div>
+                <div class="stat-box">Submit: <b id="totSubmit">0</b><br><small>Selisih: <b id="diffSubmit" style="color:red">0</b></small></div>
+                <div class="stat-box">Reject: <b id="totReject">0</b><br><small>Selisih: <b id="diffReject" style="color:red">0</b></small></div>
+                <div class="stat-box">Approve: <b id="totApprove">0</b><br><small>Selisih: <b id="diffApprove" style="color:red">0</b></small></div>
             </div>
         </div>
 
         <div class="section">
             <h2 style="cursor: pointer; color: #007bff;" onclick="toggleSection('formProgress')">+ Tambah Progress Harian</h2>
             <div id="formProgress">
-                <div class="row-wrapper"><span class="label-text">Tanggal</span><input type="text" id="progDate" placeholder="DD-MM-YYYY"></div>
+                <div class="row-wrapper"><span class="label-text">Tanggal</span><input type="date" id="progDate"></div>
                 <div class="row-wrapper"><span class="label-text">Open</span><input type="number" id="progOpen" inputmode="numeric"></div>
                 <div class="row-wrapper"><span class="label-text">Submit</span><input type="number" id="progSubmit" inputmode="numeric"></div>
                 <div class="row-wrapper"><span class="label-text">Reject</span><input type="number" id="progReject" inputmode="numeric"></div>
@@ -103,10 +113,7 @@
 
     <script>
         // Logika Umum
-        function showPage(p) {
-            document.getElementById('page-kalkulator').style.display = (p === 'kalkulator') ? 'block' : 'none';
-            document.getElementById('page-progress').style.display = (p === 'progress') ? 'block' : 'none';
-        }
+        function showPage(p) { document.getElementById('page-kalkulator').style.display = (p === 'kalkulator') ? 'block' : 'none'; document.getElementById('page-progress').style.display = (p === 'progress') ? 'block' : 'none'; }
         function toggleSection(id) { const el = document.getElementById(id); el.style.display = (el.style.display === 'block' ? 'none' : 'block'); }
 
         // Logika Kalkulator
@@ -126,13 +133,19 @@
             clearForm(); renderProgress(); toggleSection('formProgress');
         }
         function renderProgress() {
-            const list = document.getElementById('listProgress'); const target = document.getElementById('targetTot').value || 0;
-            document.getElementById('dispTarget').innerText = target; list.innerHTML = '<h2>Riwayat Harian</h2>';
+            const target = parseInt(document.getElementById('targetTot').value || 0);
+            document.getElementById('dispTarget').innerText = target;
+            const list = document.getElementById('listProgress');
+            list.innerHTML = '<h2>Riwayat Harian</h2>';
             let o=0, s=0, r=0, a=0;
             progressData.forEach((p, i) => { o+=p.o; s+=p.s; r+=p.r; a+=p.a;
-                list.innerHTML += `<div class="day-card"><div class="day-header" onclick="toggleDay(${i})">${p.d} <div><button class="btn-action" onclick="event.stopPropagation(); editEntry(${i})">Edit</button><button class="btn-action" onclick="event.stopPropagation(); deleteEntry(${i})">Hapus</button></div></div><div class="day-content" id="d-${i}">Open: ${p.o} | Submit: ${p.s} | Reject: ${p.r} | Approve: ${p.a}</div></div>`;
+                list.innerHTML += `<div class="day-card"><div class="day-header" onclick="toggleDay(${i})">${p.d} <div><button class="btn-action" onclick="event.stopPropagation(); editEntry(${i})">Edit</button><button class="btn-action" onclick="event.stopPropagation(); deleteEntry(${i})">Hapus</button></div></div><div class="day-content" id="d-${i}"><div style="font-weight:bold; margin-bottom:5px;">Target Harian: ${target}</div>Open: ${p.o} | Submit: ${p.s} | Reject: ${p.r} | Approve: ${p.a}</div></div>`;
             });
             document.getElementById('totOpen').innerText = o; document.getElementById('totSubmit').innerText = s; document.getElementById('totReject').innerText = r; document.getElementById('totApprove').innerText = a;
+            document.getElementById('diffOpen').innerText = target - o;
+            document.getElementById('diffSubmit').innerText = target - s;
+            document.getElementById('diffReject').innerText = target - r;
+            document.getElementById('diffApprove').innerText = target - a;
         }
         function clearForm() { document.getElementById('progDate').value=""; document.getElementById('progOpen').value=""; document.getElementById('progSubmit').value=""; document.getElementById('progReject').value=""; document.getElementById('progApprove').value=""; }
         function deleteEntry(i) { progressData.splice(i, 1); renderProgress(); }
