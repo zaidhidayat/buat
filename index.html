@@ -67,13 +67,13 @@
         /* --- KOTAK CARI ANIMASI MELEBAR --- */
         .folder-header-inline .search-input {
             margin-bottom: 0 !important;
-            width: 70px; /* Lebar awal saat menciut */
+            width: 70px; 
             padding: 8px 10px;
             font-size: 13px;
-            transition: width 0.3s ease; /* Efek transisi halus selama 0.3 detik */
+            transition: width 0.3s ease; 
         }
         .folder-header-inline .search-input:focus {
-            width: 160px; /* Lebar maksimal saat diklik/fokus */
+            width: 160px; 
             outline: none;
         }
         
@@ -423,15 +423,22 @@
             }
         }
 
+        // --- UPDATE FUNGSI BUKA FORM & AUTO FOCUS ---
         function toggleFormTarget() {
             const container = document.getElementById('formTargetContainer');
             const arrow = document.getElementById('formArrow');
+            
             if(container.style.display === 'block') {
                 container.style.display = 'none';
                 if(arrow) arrow.innerText = '▼';
             } else {
                 container.style.display = 'block';
                 if(arrow) arrow.innerText = '▲';
+                
+                // Menambahkan auto focus saat form terbuka
+                setTimeout(() => {
+                    document.getElementById('targetName').focus();
+                }, 50); 
             }
         }
 
