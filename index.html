@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kalkulator & Target Kerja</title>
+    <title>Kalkulator & target Kerja</title>
     <style>
         body { 
             font-family: 'Segoe UI', sans-serif; 
@@ -160,7 +160,7 @@
             align-items: center;
             padding-right: 30px;
         }
-        #formTargetContainer {
+        #formResponderContainer {
             display: none;
             margin-top: 15px;
         }
@@ -247,8 +247,8 @@
             border-top: 2px dashed #eee; 
         }
 
-        /* Style Baris Target */
-        .target-card-row {
+        /* Style Baris Responder */
+        .Responder-card-row {
             background: #f8f9fa;
             border: 1px solid #e0e0e0;
             border-radius: 8px;
@@ -259,7 +259,7 @@
             justify-content: space-between;
             gap: 8px;
         }
-        .target-name-text {
+        .Responder-name-text {
             font-size: 0.9rem;
             font-weight: bold;
             color: #333;
@@ -354,7 +354,7 @@
         </div>
     </div>
 
-    <div id="page-target" class="page">
+    <div id="page-Responder" class="page">
         <div class="section">
             <div class="hotdog-menu" onclick="toggleHotdog(event)">
                 <div class="hotdog-bar"></div>
@@ -364,23 +364,23 @@
             
             <div class="hotdog-dropdown" id="hotdogDropdown"></div>
 
-            <h2 class="collapsible-title" onclick="toggleFormTarget()">+ Tambah Target Baru</h2>
-            <div id="formTargetContainer">
+            <h2 class="collapsible-title" onclick="toggleFormResponder()">+ Tambah Responder Baru</h2>
+            <div id="formResponderContainer">
                 <div class="row-wrapper">
-                    <span class="label-text">Nama Target</span>
-                    <input type="text" id="targetName" placeholder="Masukkan nama target...">
+                    <span class="label-text">Nama Responder</span>
+                    <input type="text" id="ResponderName" placeholder="Masukkan nama Responder...">
                 </div>
-                <button onclick="addTarget()">Tambah Target</button>
+                <button onclick="addResponder()">Tambah Responder</button>
             </div>
         </div>
 
         <div class="section">
             <div class="folder-header-inline">
-                <h2 id="targetListTitle">Target Baru</h2>
-                <input type="text" id="searchTarget" class="search-input" placeholder="🔍 Cari..." oninput="renderTargets()">
+                <h2 id="ResponderListTitle">Responder Baru</h2>
+                <input type="text" id="searchResponder" class="search-input" placeholder="🔍 Cari..." oninput="renderResponders()">
             </div>
             
-            <div id="targetList"></div>
+            <div id="ResponderList"></div>
         </div>
     </div>
 
@@ -397,35 +397,35 @@
 
     <div class="navbar">
         <div id="nav-kalkulator" class="nav-item" onclick="showPage('kalkulator')">Kalkulator</div>
-        <div id="nav-target" class="nav-item inactive" onclick="showPage('target')">Target</div>
+        <div id="nav-Responder" class="nav-item inactive" onclick="showPage('Responder')">Responder</div>
     </div>
 
     <script>
         // --- LOGIK NAVIGASI ---
         function showPage(page) {
             const pageKalkulator = document.getElementById('page-kalkulator');
-            const pageTarget = document.getElementById('page-target');
+            const pageResponder = document.getElementById('page-Responder');
             const navKalkulator = document.getElementById('nav-kalkulator');
-            const navTarget = document.getElementById('nav-target');
+            const navResponder = document.getElementById('nav-Responder');
 
             hideHotdog();
 
             if (page === 'kalkulator') {
                 pageKalkulator.classList.add('active');
-                pageTarget.classList.remove('active');
+                pageResponder.classList.remove('active');
                 navKalkulator.classList.remove('inactive');
-                navTarget.classList.add('inactive');
+                navResponder.classList.add('inactive');
             } else {
                 pageKalkulator.classList.remove('active');
-                pageTarget.classList.add('active');
+                pageResponder.classList.add('active');
                 navKalkulator.classList.add('inactive');
-                navTarget.classList.remove('inactive');
+                navResponder.classList.remove('inactive');
             }
         }
 
         // --- UPDATE FUNGSI BUKA FORM & AUTO FOCUS ---
-        function toggleFormTarget() {
-            const container = document.getElementById('formTargetContainer');
+        function toggleFormResponder() {
+            const container = document.getElementById('formResponderContainer');
             const arrow = document.getElementById('formArrow');
             
             if(container.style.display === 'block') {
@@ -437,15 +437,15 @@
                 
                 // Menambahkan auto focus saat form terbuka
                 setTimeout(() => {
-                    document.getElementById('targetName').focus();
+                    document.getElementById('ResponderName').focus();
                 }, 50); 
             }
         }
 
         // --- LOGIK DINAMIS MENU HOTDOG & DATA MULTI-LIST ---
-        let hotdogFolders = JSON.parse(localStorage.getItem('myHotdogFolders')) || ["Target Baru"];
+        let hotdogFolders = JSON.parse(localStorage.getItem('myHotdogFolders')) || ["Responder Baru"];
         let activeFolderIndex = parseInt(localStorage.getItem('myActiveFolderIndex')) || 0;
-        let multiListTargets = JSON.parse(localStorage.getItem('myMultiListTargets')) || { "Target Baru": [] };
+        let multiListResponders = JSON.parse(localStorage.getItem('myMultiListResponders')) || { "Responder Baru": [] };
 
         if (activeFolderIndex >= hotdogFolders.length) {
             activeFolderIndex = 0;
@@ -467,18 +467,18 @@
                     </div>`;
             });
 
-            dropdown.innerHTML += `<div class="hotdog-item danger" onclick="resetCurrentFolderTargets()">Reset Target Folder Ini</div>`;
+            dropdown.innerHTML += `<div class="hotdog-item danger" onclick="resetCurrentFolderResponders()">Reset Responder Folder Ini</div>`;
         }
 
         function selectFolder(index) {
             activeFolderIndex = index;
             localStorage.setItem('myActiveFolderIndex', activeFolderIndex);
             
-            document.getElementById('targetListTitle').innerText = hotdogFolders[index];
-            document.getElementById('searchTarget').value = ''; 
+            document.getElementById('ResponderListTitle').innerText = hotdogFolders[index];
+            document.getElementById('searchResponder').value = ''; 
             
             renderHotdogMenu();
-            renderTargets();
+            renderResponders();
             hideHotdog();
         }
 
@@ -493,7 +493,7 @@
         }
 
         window.onclick = function(event) {
-            if (!event.target.matches('.hotdog-menu') && !event.target.matches('.hotdog-bar')) {
+            if (!event.Responder.matches('.hotdog-menu') && !event.Responder.matches('.hotdog-bar')) {
                 hideHotdog();
             }
         }
@@ -522,7 +522,7 @@
             }
 
             hotdogFolders.push(folderName);
-            multiListTargets[folderName] = []; 
+            multiListResponders[folderName] = []; 
             
             saveAllToStorage();
             renderHotdogMenu();
@@ -532,13 +532,13 @@
 
         function deleteFolder(event, index, folderName) {
             event.stopPropagation();
-            if(confirm(`Hapus menu "${folderName}" beserta semua data target di dalamnya?`)) {
+            if(confirm(`Hapus menu "${folderName}" beserta semua data Responder di dalamnya?`)) {
                 hotdogFolders.splice(index, 1);
-                delete multiListTargets[folderName]; 
+                delete multiListResponders[folderName]; 
                 
                 if (hotdogFolders.length === 0) {
-                    hotdogFolders = ["Target Baru"];
-                    multiListTargets["Target Baru"] = [];
+                    hotdogFolders = ["Responder Baru"];
+                    multiListResponders["Responder Baru"] = [];
                     activeFolderIndex = 0;
                 } else {
                     if (activeFolderIndex === index) {
@@ -553,28 +553,28 @@
             }
         }
 
-        function resetCurrentFolderTargets() {
+        function resetCurrentFolderResponders() {
             const currentFolderName = hotdogFolders[activeFolderIndex];
-            if(confirm(`Apakah kamu yakin ingin menghapus SEMUA target di folder "${currentFolderName}"?`)) {
-                multiListTargets[currentFolderName] = [];
+            if(confirm(`Apakah kamu yakin ingin menghapus SEMUA Responder di folder "${currentFolderName}"?`)) {
+                multiListResponders[currentFolderName] = [];
                 saveAllToStorage();
-                renderTargets();
+                renderResponders();
                 hideHotdog();
             }
         }
 
-        // --- LOGIK TARGET TERINTEGRASI FOLDER ---
-        function renderTargets() {
-            const container = document.getElementById('targetList');
-            const searchQuery = document.getElementById('searchTarget').value.toLowerCase();
+        // --- LOGIK Responder TERINTEGRASI FOLDER ---
+        function renderResponders() {
+            const container = document.getElementById('ResponderList');
+            const searchQuery = document.getElementById('searchResponder').value.toLowerCase();
             
             const currentFolderName = hotdogFolders[activeFolderIndex];
-            const currentList = multiListTargets[currentFolderName] || [];
+            const currentList = multiListResponders[currentFolderName] || [];
             
             const filteredData = currentList.filter(item => item.name.toLowerCase().includes(searchQuery));
 
             if(currentList.length === 0) {
-                container.innerHTML = `<p style="text-align:center; color:#888; font-size:0.9rem;">Belum ada target di folder "${currentFolderName}".</p>`;
+                container.innerHTML = `<p style="text-align:center; color:#888; font-size:0.9rem;">Belum ada Responder di folder "${currentFolderName}".</p>`;
                 return;
             }
             if(filteredData.length === 0) {
@@ -586,61 +586,61 @@
             filteredData.forEach((item) => {
                 const originalIndex = currentList.indexOf(item);
                 container.innerHTML += `
-                    <div class="target-card-row">
-                        <div class="target-name-text">${item.name}</div>
+                    <div class="Responder-card-row">
+                        <div class="Responder-name-text">${item.name}</div>
                         <div class="tag-row-container">
                             <button class="badge-btn-sm ${item.tagging ? 'active-badge' : ''}" onclick="toggleFeature(${originalIndex}, 'tagging')">Tag</button>
                             <button class="badge-btn-sm ${item.ttd ? 'active-badge' : ''}" onclick="toggleFeature(${originalIndex}, 'ttd')">TTD</button>
                             <button class="badge-btn-sm ${item.listrik ? 'active-badge' : ''}" onclick="toggleFeature(${originalIndex}, 'listrik')">Lis</button>
                             <button class="badge-btn-sm ${item.foto ? 'active-badge' : ''}" onclick="toggleFeature(${originalIndex}, 'foto')">Foto</button>
                         </div>
-                        <div class="btn-delete-sm" onclick="deleteTarget(${originalIndex})">✖</div>
+                        <div class="btn-delete-sm" onclick="deleteResponder(${originalIndex})">✖</div>
                     </div>
                 `;
             });
         }
 
-        function addTarget() {
-            const nameInput = document.getElementById('targetName');
+        function addResponder() {
+            const nameInput = document.getElementById('ResponderName');
             if(nameInput.value.trim() === "") {
-                alert("Nama target tidak boleh kosong!");
+                alert("Nama Responder tidak boleh kosong!");
                 return;
             }
             
             const currentFolderName = hotdogFolders[activeFolderIndex];
-            if(!multiListTargets[currentFolderName]) multiListTargets[currentFolderName] = [];
+            if(!multiListResponders[currentFolderName]) multiListResponders[currentFolderName] = [];
             
-            multiListTargets[currentFolderName].push({ name: nameInput.value, tagging: false, ttd: false, listrik: false, foto: false });
+            multiListResponders[currentFolderName].push({ name: nameInput.value, tagging: false, ttd: false, listrik: false, foto: false });
             
             saveAllToStorage();
             nameInput.value = '';
-            renderTargets();
-            toggleFormTarget(); 
+            renderResponders();
+            toggleFormResponder(); 
         }
 
         function toggleFeature(index, featureKey) {
             const currentFolderName = hotdogFolders[activeFolderIndex];
-            multiListTargets[currentFolderName][index][featureKey] = !multiListTargets[currentFolderName][index][featureKey];
+            multiListResponders[currentFolderName][index][featureKey] = !multiListResponders[currentFolderName][index][featureKey];
             saveAllToStorage();
-            renderTargets();
+            renderResponders();
         }
 
-        function deleteTarget(index) {
+        function deleteResponder(index) {
             const currentFolderName = hotdogFolders[activeFolderIndex];
-            multiListTargets[currentFolderName].splice(index, 1);
+            multiListResponders[currentFolderName].splice(index, 1);
             saveAllToStorage();
-            renderTargets();
+            renderResponders();
         }
 
         function saveAllToStorage() {
             localStorage.setItem('myHotdogFolders', JSON.stringify(hotdogFolders));
             localStorage.setItem('myActiveFolderIndex', activeFolderIndex);
-            localStorage.setItem('myMultiListTargets', JSON.stringify(multiListTargets));
+            localStorage.setItem('myMultiListResponders', JSON.stringify(multiListResponders));
         }
 
         // --- INISIALISASI AWAL ---
-        document.getElementById('targetListTitle').innerText = hotdogFolders[activeFolderIndex];
-        renderTargets();
+        document.getElementById('ResponderListTitle').innerText = hotdogFolders[activeFolderIndex];
+        renderResponders();
         renderHotdogMenu();
 
         // --- LOGIK KALKULATOR (TETAP AMAN) ---
