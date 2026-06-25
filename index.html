@@ -363,6 +363,8 @@
             </div>
             
             <div class="hotdog-dropdown" id="hotdogDropdown"></div>
+            
+            <input type="file" id="uploadData" accept="*/*" style="display:none" onchange="processSyncData(event)">
 
             <h2 class="collapsible-title" onclick="toggleFormResponder()">+ Tambah Responder Baru</h2>
             <div id="formResponderContainer">
@@ -376,7 +378,7 @@
 
         <div class="section">
             <div class="folder-header-inline">
-                <h2 id="ResponderListTitle">Responder Baru</h2>
+                <h2 id="ResponderListTitle">SLS Baru</h2>
                 <input type="text" id="searchResponder" class="search-input" placeholder="🔍 Cari..." oninput="renderResponders()">
             </div>
             
@@ -386,7 +388,7 @@
 
     <div id="hotdogModal" class="modal">
         <div class="modal-content">
-            <h3 style="margin-top:0; font-size:1rem; color:#333;">Tambah Item Menu Baru</h3>
+            <h3 style="margin-top:0; font-size:1rem; color:#333;">Tambah SLS Baru</h3>
             <input type="text" id="newHotdogItemName" placeholder="Nama menu...">
             <div class="modal-buttons">
                 <button class="btn-secondary" onclick="closeHotdogModal()">Batal</button>
@@ -435,7 +437,6 @@
                 container.style.display = 'block';
                 if(arrow) arrow.innerText = '▲';
                 
-                // Menambahkan auto focus saat form terbuka
                 setTimeout(() => {
                     document.getElementById('ResponderName').focus();
                 }, 50); 
@@ -443,9 +444,9 @@
         }
 
         // --- LOGIK DINAMIS MENU HOTDOG & DATA MULTI-LIST ---
-        let hotdogFolders = JSON.parse(localStorage.getItem('myHotdogFolders')) || ["Responder Baru"];
+        let hotdogFolders = JSON.parse(localStorage.getItem('myHotdogFolders')) || ["SLS Baru"];
         let activeFolderIndex = parseInt(localStorage.getItem('myActiveFolderIndex')) || 0;
-        let multiListResponders = JSON.parse(localStorage.getItem('myMultiListResponders')) || { "Responder Baru": [] };
+        let multiListResponders = JSON.parse(localStorage.getItem('myMultiListResponders')) || { "SLS Baru": [] };
 
         if (activeFolderIndex >= hotdogFolders.length) {
             activeFolderIndex = 0;
@@ -455,7 +456,7 @@
             const dropdown = document.getElementById('hotdogDropdown');
             dropdown.innerHTML = '';
 
-            dropdown.innerHTML += `<div class="hotdog-item" onclick="openHotdogModal()" style="color: #007bff; border-bottom: 1px solid #eee;">+ Tambah Item</div>`;
+            dropdown.innerHTML += `<div class="hotdog-item" onclick="openHotdogModal()" style="color: #007bff; border-bottom: 1px solid #eee;">+ Tambah SLS</div>`;
 
             hotdogFolders.forEach((folderName, index) => {
                 const isActive = (index === activeFolderIndex) ? 'active-folder' : '';
@@ -467,6 +468,11 @@
                     </div>`;
             });
 
+            // OPSI: BACKUP & SYNKRON
+            dropdown.innerHTML += `<div class="hotdog-item" style="border-top: 1px solid #eee; color: #28a745;" onclick="backupData()">📥 Backup Data</div>`;
+            dropdown.innerHTML += `<div class="hotdog-item" style="color: #17a2b8;" onclick="triggerSync()">📤 Synkron Data</div>`;
+            
+            // DANGER ZONE
             dropdown.innerHTML += `<div class="hotdog-item danger" onclick="resetCurrentFolderResponders()">Reset Responder Folder Ini</div>`;
         }
 
@@ -493,7 +499,7 @@
         }
 
         window.onclick = function(event) {
-            if (!event.Responder.matches('.hotdog-menu') && !event.Responder.matches('.hotdog-bar')) {
+            if (!event.target.matches('.hotdog-menu') && !event.target.matches('.hotdog-bar')) {
                 hideHotdog();
             }
         }
@@ -537,8 +543,8 @@
                 delete multiListResponders[folderName]; 
                 
                 if (hotdogFolders.length === 0) {
-                    hotdogFolders = ["Responder Baru"];
-                    multiListResponders["Responder Baru"] = [];
+                    hotdogFolders = ["SLS Baru"];
+                    multiListResponders["SLS Baru"] = [];
                     activeFolderIndex = 0;
                 } else {
                     if (activeFolderIndex === index) {
@@ -561,6 +567,71 @@
                 renderResponders();
                 hideHotdog();
             }
+        }
+
+        // --- FUNGSI BACKUP & SYNKRON (DIPERBAIKI) ---
+        function backupData() {
+            const dataToBackup = {
+                hotdogFolders: hotdogFolders,
+                activeFolderIndex: activeFolderIndex,
+                multiListResponders: multiListResponders
+            };
+            
+            // Diperbaiki: Menggunakan Blob agar file terbentuk dengan benar di sistem operasi mobile
+            const dataStr = JSON.stringify(dataToBackup);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.href = url;
+            downloadAnchorNode.download = "backup_responder.json";
+            document.body.appendChild(downloadAnchorNode); 
+            downloadAnchorNode.click();
+            
+            // Pembersihan
+            setTimeout(() => {
+                downloadAnchorNode.remove();
+                URL.revokeObjectURL(url);
+            }, 100);
+            
+            hideHotdog();
+        }
+
+        function triggerSync() {
+            document.getElementById('uploadData').click();
+            hideHotdog();
+        }
+
+        function processSyncData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    
+                    if (importedData.hotdogFolders && importedData.multiListResponders) {
+                        hotdogFolders = importedData.hotdogFolders;
+                        activeFolderIndex = importedData.activeFolderIndex || 0;
+                        multiListResponders = importedData.multiListResponders;
+                        
+                        saveAllToStorage();
+                        renderHotdogMenu();
+                        selectFolder(activeFolderIndex);
+                        
+                        alert("Data berhasil disinkronkan!");
+                    } else {
+                        alert("Isi data tidak sesuai dengan format aplikasi!");
+                    }
+                } catch (error) {
+                    alert("Gagal membaca file! Pastikan kamu memilih file backup yang benar (format .json).");
+                }
+            };
+            reader.readAsText(file);
+            
+            // Reset input file agar bisa upload file lagi nanti
+            event.target.value = '';
         }
 
         // --- LOGIK Responder TERINTEGRASI FOLDER ---
